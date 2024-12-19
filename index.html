@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Bingo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #1a2c2a;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #1a2c2a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-circle {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            padding: 5px 15px;
+            background: #943232;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Setup Page Styles */
+        .setup-page {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .game-info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            color: black;
+        }
+
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .number-btn {
+            aspect-ratio: 1;
+            background: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .number-btn.selected {
+            background: #ff4444;
+            color: white;
+        }
+
+        .create-game-btn {
+            display: block;
+            width: 200px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: #943232;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Game Page Styles */
+        .game-page {
+            display: none;
+            padding: 2rem;
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            color: black;
+            min-width: 150px;
+        }
+
+        .bingo-board {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+        }
+
+        .bingo-letters {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .bingo-letter {
+            width: 40px;
+            height: 40px;
+            background: white;
+            color: #943232;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .numbers-container {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 4px;
+        }
+
+        .game-number {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .game-number.called {
+            background: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .controls-section {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        select, input {
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 4px;
+        }
+
+        .modern-logo {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 100px;
+            height: 100px;
+            background: #00ff00;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .clear-cards {
+            padding: 0.5rem 1rem;
+            background: #943232;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+            width: fit-content;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <div class="logo-circle">MB</div>
+            <h1>Modern Bingo</h1>
+        </div>
+        <div class="user-section">
+            <span>Welcome, Lidiya</span>
+            <button class="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <!-- Setup Page -->
+    <div class="setup-page" id="setupPage">
+        <div class="game-info-cards">
+            <div class="info-card">
+                <h3>Game Number</h3>
+                <div class="game-number-display">
+                    <span id="currentGame">1</span>
+                    <small>2/100</small>
+                </div>
+            </div>
+            <div class="info-card">
+                <h3>Game bid</h3>
+                <div class="bid-control">
+                    <input type="number" value="100" min="1" max="1000" id="gameBid">
+                </div>
+            </div>
+            <div class="info-card">
+                <h3>Difficulty</h3>
+                <div class="difficulty-display">Medium</div>
+            </div>
+            <div class="info-card">
+                <h3>Custom pattern</h3>
+                <select id="patternSelect">
+                    <option value="1">1 line</option>
+                    <option value="2">2 lines</option>
+                    <option value="full">Full house</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="number-grid" id="numberGrid"></div>
+        <button class="clear-cards" id="clearCards">Clear cards</button>
+        <button class="create-game-btn" id="createGame">Create game</button>
+    </div>
+
+    <!-- Game Page -->
+    <div class="game-page" id="gamePage">
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Total Calls</h3>
+                <div id="totalCalls">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Previous Call</h3>
+                <div id="previousCall">-</div>
+            </div>
+        </div>
+
+        <div class="bingo-board">
+            <div class="bingo-letters">
+                <div class="bingo-letter">B</div>
+                <div class="bingo-letter">I</div>
+                <div class="bingo-letter">N</div>
+                <div class="bingo-letter">G</div>
+                <div class="bingo-letter">O</div>
+            </div>
+            <div class="numbers-container" id="gameBoard"></div>
+        </div>
+
+        <div class="controls-section">
+            <div class="control-group">
+                <label>Caller selection</label>
+                <select id="callerVoice">
+                    <option>Amharic Men Modern - Default</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Autoplay speed</label>
+                <input type="range" min="1" max="100" value="50" id="autoplaySpeed">
+            </div>
+            <div class="control-group">
+                <button class="btn" id="startAutoplay">Start AutoPlay</button>
+                <button class="btn" id="startNewGame">Start New Game</button>
+            </div>
+            <div class="control-group">
+                <label>Board Number</label>
+                <input type="number" id="boardNumber" value="0">
+                <button class="btn" id="checkBoard">Check</button>
+            </div>
+            <div class="control-group">
+                <h3>WINNER PRIZE</h3>
+                <h2>48 Birr</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="modern-logo">
+        Modern<br>Bingo
+    </div>
+
+    <script>
+        // Game state
+        let calledNumbers = new Set();
+        let selectedNumbers = new Set();
+        let autoplayInterval = null;
+        let gameActive = false;
+
+        // Initialize setup page number grid
+        function initializeNumberGrid() {
+            const grid = document.getElementById('numberGrid');
+            for (let i = 1; i <= 100; i++) {
+                const button = document.createElement('button');
+                button.className = 'number-btn';
+                button.textContent = i;
+                button.onclick = () => {
+                    button.classList.toggle('selected');
+                    if (selectedNumbers.has(i)) {
+                        selectedNumbers.delete(i);
+                    } else {
+                        selectedNumbers.add(i);
+                    }
+                };
+                grid.appendChild(button);
+            }
+        }
+
+        // Initialize game board
+        function initializeGameBoard() {
+            const board = document.getElementById('gameBoard');
+            for (let i = 1; i <= 75; i++) {
+                const number = document.createElement('div');
+                number.className = 'game-number';
+                number.textContent = i;
+                board.appendChild(number);
+            }
+        }
+
+        // Toggle between pages
+        function showGamePage() {
+            document.getElementById('setupPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'block';
+            gameActive = true;
+            initializeGameBoard();
+        }
+
+        function showSetupPage() {
+            document.getElementById('setupPage').style.display = 'block';
+            document.getElementById('gamePage').style.display = 'none';
+            gameActive = false;
+            calledNumbers.clear();
+            updateStats();
+        }
+
+        // Game functions
+        function callNumber(num) {
+            if (calledNumbers.has(num)) return;
+            
+            calledNumbers.add(num);
+            const numbers = document.querySelectorAll('.game-number');
+            numbers[num - 1].classList.add('called');
+            updateStats();
+            playNumberSound(num);
+            checkWinner();
+        }
+
+        function updateStats() {
+            document.getElementById('totalCalls').textContent = calledNumbers.size;
+            const lastCall = Array.from(calledNumbers).pop() || '-';
+            document.getElementById('previousCall').textContent = lastCall;
+        }
+
+        function toggleAutoplay() {
+            const button = document.getElementById('startAutoplay');
+            if (autoplayInterval) {
+                clearInterval(autoplayInterval);
+                autoplayInterval = null;
+                button.textContent = 'Start AutoPlay';
+            } else {
+                const speed = (100 - document.getElementById('autoplaySpeed').value) * 100 + 1000;
+                autoplayInterval = setInterval(callRandomNumber, speed);
+                button.textContent = 'Stop AutoPlay';
+            }
+        }
+
+        function callRandomNumber() {
+            if (calledNumbers.size >= 75) return;
+            let num;
+            do {
+                num = Math.floor(Math.random() * 75) + 1;
+            } while (calledNumbers.has(num));
+            callNumber(num);
+        }
+
+        // Event listeners
+        document.getElementById('createGame').addEventListener('click', showGamePage);
+        document.getElementById('startNewGame').addEventListener('click', showSetupPage);
+        document.getElementById('startAutoplay').addEventListener('click', toggleAutoplay);
+        document.getElementById('clearCards').addEventListener('click', () => {
+            selectedNumbers.clear();
+            document.querySelectorAll('.number-btn').forEach(btn => btn.classList.remove('selected'));
+        });
+
+        // Initialize game
+        initializeNumberGrid();
+
+        // Sound effects (add your own audio files)
+        function playNumberSound(num) {
+            // Implement your sound playing logic here
+            const audio = new Audio(`sounds/${num}.mp3`);
+            audio.play().catch(error => console.log('Audio play failed:', error));
+        }
+
+        // Winner checking
+        function checkWinner() {
+            // Implement your winning pattern check logic here
+            const winningPatterns = [
+                [1,2,3,4,5], // Horizontal lines
+                [6,7,8,9,10],
+                [11,12,13,14,15],
+                [1,6,11,16,21], // Vertical lines
+                [2,7,12,17,22],
+                [3,8,13,18,23],
+                [1,7,13,19,25], // Diagonals
+                [5,9,13,17,21]
+            ];
+
+            for (let pattern of winningPatterns) {
+                if (pattern.every(num => calledNumbers.has(num))) {
+                    alert('WINNER!');
+                    clearInterval(autoplayInterval);
+                    return;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
